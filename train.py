@@ -12,7 +12,7 @@ d = DataLoader("./data/patent.txt.refined.sep.combine.skts.combine.id")
 mod = UniSkip()
 loc = "./saved_models/skip-best"
 # 기존 모델로 초기화 : 이어서 트레이닝하는 것과 유사
-# mod.load_state_dict(torch.load(loc, map_location=lambda storage, loc: storage))
+mod.load_state_dict(torch.load(loc, map_location=lambda storage, loc: storage))
 if USE_CUDA:
     mod.cuda(CUDA_DEVICE)
 
