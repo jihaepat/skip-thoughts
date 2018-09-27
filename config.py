@@ -2,7 +2,7 @@
 Configuration file.
 """
 
-VOCAB_SIZE = 32000
+VOCAB_SIZE = 16000
 USE_CUDA = True
 DEVICES = [0]
 CUDA_DEVICE = DEVICES[0]

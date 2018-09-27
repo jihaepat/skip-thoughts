@@ -7,9 +7,12 @@ from model import UniSkip
 from config import *
 from datetime import datetime, timedelta
 
-d = DataLoader("./data/patent.refined.sep.unigram.id.txt")
+d = DataLoader("./data/patent.txt.refined.sep.combine.skts.combine.id")
 
 mod = UniSkip()
+loc = "./saved_models/skip-best"
+# 기존 모델로 초기화 : 이어서 트레이닝하는 것과 유사
+# mod.load_state_dict(torch.load(loc, map_location=lambda storage, loc: storage))
 if USE_CUDA:
     mod.cuda(CUDA_DEVICE)
 
@@ -57,9 +60,9 @@ def debug(i, loss, prev, nex, prev_pred, next_pred):
 
 print("Starting training...")
 
-# total lines count : 286118129
-for i in range(0, 1430590*2):
-    sentences, lengths = d.fetch_batch(200)
+# total lines count : 230005621
+for i in range(0, 552898*1):
+    sentences, lengths = d.fetch_batch(416)
 
     loss, prev, nex, prev_pred, next_pred  = mod(sentences, lengths)
 
