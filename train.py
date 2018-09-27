@@ -1,11 +1,9 @@
 import torch
-from torch import nn
-from torch.autograd import Variable
 
-from data_loader import DataLoader, load_dictionary
+from data_loader import DataLoader
 from model import UniSkip
 from config import *
-from datetime import datetime, timedelta
+from datetime import datetime
 
 d = DataLoader("./data/patent.txt.refined.sep.combine.skts.combine.id")
 
@@ -22,6 +20,7 @@ optimizer = torch.optim.Adam(params=mod.parameters(), lr=lr)
 loss_trail = []
 last_best_loss = None
 current_time = datetime.utcnow()
+
 
 def debug(i, loss, prev, nex, prev_pred, next_pred):
     global loss_trail
