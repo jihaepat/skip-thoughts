@@ -10,7 +10,7 @@ from datetime import datetime
 # 파라메터 세팅
 parser = argparse.ArgumentParser()
 parser.add_argument('--train_data', type=str, default='./data/test.id')
-parser.add_argument('--init_model', type=str, default='./saved_models/skip-best')
+parser.add_argument('--init_model', type=str, default='')
 parser.add_argument('--batch_size', type=int, default=200)
 parser.add_argument('--total_epoch', type=int, default=2)
 args = parser.parse_args()
