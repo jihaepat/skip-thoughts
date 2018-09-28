@@ -10,14 +10,16 @@ from datetime import datetime
 # 파라메터 세팅
 parser = argparse.ArgumentParser()
 parser.add_argument('--train_data', type=str, default='./data/test.id')
-parser.add_argument('--init_model', type=str, default='./saved_models/skip-best')
+parser.add_argument('--init_model', type=str, default='')
 parser.add_argument('--batch_size', type=int, default=400)
-parser.add_argument('--total_epoch', type=int, default=2)
+parser.add_argument('--total_epoch', type=int, default=100)
+parser.add_argument('--save_epoch', type=int, default=0)
 args = parser.parse_args()
 train_data = args.train_data
 init_model = args.init_model
 batch_size = args.batch_size
 total_epoch = args.total_epoch
+save_epoch = args.save_epoch
 
 # sentences 로딩
 d = DataLoader(train_data)
@@ -97,8 +99,9 @@ for epoch in range(0, total_epoch):
         optimizer.step()
 
     # save after every epoch
-    save_loc_epoch = "./saved_models/skip-{}-epoch".format(epoch)
-    print("saving model at {}".format(save_loc_epoch))
-    torch.save(mod.state_dict(), save_loc_epoch)
+    if save_epoch:
+        save_loc_epoch = "./saved_models/skip-{}-epoch".format(epoch)
+        print("saving model at {}".format(save_loc_epoch))
+        torch.save(mod.state_dict(), save_loc_epoch)
 
 print('End training.')
