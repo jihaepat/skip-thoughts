@@ -83,7 +83,7 @@ def debug(epoch, i, loss, prev, nex, prev_pred, next_pred):
 
 
 # train!!!
-lr = 1e-3
+lr = 3.16e-4
 optimizer = torch.optim.Adam(params=mod.parameters(), lr=lr)
 iter_count_per_epoch = int(math.ceil(sentences_count/batch_size))
 print('iter_count_per_epoch : {}'.format(iter_count_per_epoch))
