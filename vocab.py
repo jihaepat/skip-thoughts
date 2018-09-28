@@ -25,7 +25,7 @@ def build_dictionary(text):
 
     worddict = OrderedDict()
     for idx, word in enumerate(sorted_words):
-        worddict[word] = idx+2 # 0: <eos>, 1: <unk>
+        worddict[word] = idx+3  # 0: UNK, 1: BOS, 2: EOS
 
     return worddict, wordcount
 

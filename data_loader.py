@@ -13,9 +13,6 @@ np.random.seed(0)
 
 
 class DataLoader:
-    EOS = 0  # to mean end of sentence
-    UNK = 1  # to mean unknown token
-
     maxlen = MAXLEN
 
     def __init__(self, text_file=None, sentences=None, word_dict=None):
@@ -40,13 +37,13 @@ class DataLoader:
 
         indices = [
                       # assign an integer to each word, if the word is too rare assign unknown token
-                      self.word_dict.get(w) if self.word_dict.get(w, VOCAB_SIZE + 1) < VOCAB_SIZE else self.UNK
+                      self.word_dict.get(w) if self.word_dict.get(w, VOCAB_SIZE + 1) < VOCAB_SIZE else UNK
 
                       for w in sentence.split()  # split into words on spaces
                   ][: self.maxlen - 1]  # take only maxlen-1 words per sentence at the most.
 
         # last words are EOS
-        indices += [self.EOS] * (self.maxlen - len(indices))
+        indices += [EOS] * (self.maxlen - len(indices))
 
         indices = np.array(indices)
         indices = Variable(torch.from_numpy(indices))
@@ -60,12 +57,14 @@ class DataLoader:
         def convert_index_to_word(idx):
 
             idx = idx.data[0]
-            if idx == 0:
-                return "EOS"
-            elif idx == 1:
-                return "UNK"
-            
-            search_idx = idx - 2
+            if idx == EOS:
+                return '2'
+            elif idx == BOS:
+                return '1'
+            elif idx == UNK:
+                return '0'
+
+            search_idx = idx - 3
             if search_idx >= len(self.revmap):
                 return "NA"
             
