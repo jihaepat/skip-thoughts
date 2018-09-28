@@ -12,17 +12,19 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--train_data', type=str, default='./data/test.id')
 parser.add_argument('--init_model', type=str, default='')
 parser.add_argument('--batch_size', type=int, default=400)
-parser.add_argument('--total_epoch', type=int, default=100)
+parser.add_argument('--total_epoch', type=int, default=10)
 parser.add_argument('--save_epoch', type=int, default=0)
+parser.add_argument('--total_line_count', type=int, default=0)
 args = parser.parse_args()
 train_data = args.train_data
 init_model = args.init_model
 batch_size = args.batch_size
 total_epoch = args.total_epoch
 save_epoch = args.save_epoch
+total_line_count = args.total_line_count
 
 # sentences 로딩
-d = DataLoader(train_data)
+d = DataLoader(train_data, total_line_count)
 sentences_count = len(d.sentences)
 print('total {} sentences'.format(sentences_count))
 
@@ -47,7 +49,7 @@ def debug(epoch, i, loss, prev, nex, prev_pred, next_pred):
     global last_best_loss
     global current_time
 
-    this_loss = loss.data[0]
+    this_loss = loss.item()
     loss_trail.append(this_loss)
     loss_trail = loss_trail[-20:]
     new_current_time = datetime.utcnow()
@@ -57,10 +59,10 @@ def debug(epoch, i, loss, prev, nex, prev_pred, next_pred):
               epoch, i, time_elapsed, last_best_loss, this_loss))
 
     print("prev = {}\nnext = {}\npred_prev = {}\npred_next = {}".format(
-        d.convert_indices_to_sentences(prev),
-        d.convert_indices_to_sentences(nex),
-        d.convert_indices_to_sentences(prev_pred),
-        d.convert_indices_to_sentences(next_pred),
+        d.convert_var_to_sentences(prev),
+        d.convert_var_to_sentences(nex),
+        d.convert_var_to_sentences(prev_pred),
+        d.convert_var_to_sentences(next_pred),
     ))
 
     try:
@@ -78,7 +80,7 @@ def debug(epoch, i, loss, prev, nex, prev_pred, next_pred):
 
 
 # train!!!
-lr = 3e-4
+lr = 1e-3
 optimizer = torch.optim.Adam(params=mod.parameters(), lr=lr)
 iter_count_per_epoch = int(math.ceil(sentences_count/batch_size))
 print('iter_count_per_epoch : {}'.format(iter_count_per_epoch))
