@@ -96,7 +96,6 @@ class UniSkip(nn.Module):
 
     def create_mask(self, var, lengths):
         mask = var.data.new().resize_as_(var.data).fill_(0)
-#         print("lengths", lengths)
         for i, l in enumerate(lengths):
             for j in range(l):
                 mask[i, j] = 1
