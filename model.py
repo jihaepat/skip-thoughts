@@ -95,7 +95,7 @@ class UniSkip(nn.Module):
         self.decoders = DuoDecoder()
 
     def create_mask(self, var, lengths):
-        mask = var.data.new().resize_as_(var.data).fill_(EOS)
+        mask = var.data.new().resize_as_(var.data).fill_(0)
 #         print("lengths", lengths)
         for i, l in enumerate(lengths):
             for j in range(l):
