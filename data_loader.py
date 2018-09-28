@@ -34,7 +34,6 @@ class DataLoader:
                 splits = line.split()
                 for j, w in enumerate(splits[:MAXLEN-1]):
                     sentences[i][j] = int(w)
-                assert sentences[i][-1] == EOS
                 # +1 을 해서 끝의 EOS 를 포함시킨다.
                 lengths[i] = min(len(splits) + 1, MAXLEN)
                 if i % 100000 == 0:
