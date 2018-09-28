@@ -13,8 +13,6 @@ np.random.seed(0)
 
 
 class DataLoader:
-    maxlen = MAXLEN
-
     def __init__(self, text_file=None, sentences=None, word_dict=None):
 
         if text_file:
@@ -40,10 +38,10 @@ class DataLoader:
                       self.word_dict.get(w) if self.word_dict.get(w, VOCAB_SIZE + 1) < VOCAB_SIZE else UNK
 
                       for w in sentence.split()  # split into words on spaces
-                  ][: self.maxlen - 1]  # take only maxlen-1 words per sentence at the most.
+                  ][: MAXLEN - 1]  # take only maxlen-1 words per sentence at the most.
 
         # last words are EOS
-        indices += [EOS] * (self.maxlen - len(indices))
+        indices += [EOS] * (MAXLEN - len(indices))
 
         indices = np.array(indices)
         indices = Variable(torch.from_numpy(indices))
