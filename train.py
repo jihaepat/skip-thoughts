@@ -29,6 +29,7 @@ sentences_count = len(d.sentences)
 print('total {} sentences'.format(sentences_count))
 
 # 모델 초기화
+print('model init begin...')
 mod = UniSkip()
 if init_model:
     try:
@@ -37,6 +38,7 @@ if init_model:
         print('load init_model failed: {}'.format(init_model))
 if USE_CUDA:
     mod.cuda(CUDA_DEVICE)
+print('model init end.')
 
 # 디버깅용 변수 및 함수
 loss_trail = []
@@ -86,7 +88,7 @@ optimizer = torch.optim.Adam(params=mod.parameters(), lr=lr)
 iter_count_per_epoch = int(math.ceil(sentences_count/batch_size))
 print('iter_count_per_epoch : {}'.format(iter_count_per_epoch))
 
-print("Starting training...")
+print("training begin...")
 
 for epoch in range(0, total_epoch):
     for i in range(0, iter_count_per_epoch):
@@ -107,4 +109,4 @@ for epoch in range(0, total_epoch):
         print("saving model at {}".format(save_loc_epoch))
         torch.save(mod.state_dict(), save_loc_epoch)
 
-print('End training.')
+print('training end.')
