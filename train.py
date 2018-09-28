@@ -13,14 +13,14 @@ parser.add_argument('--train_data', type=str, default='./data/test.id')
 parser.add_argument('--init_model', type=str, default='')
 parser.add_argument('--batch_size', type=int, default=400)
 parser.add_argument('--total_epoch', type=int, default=10)
-parser.add_argument('--save_epoch', type=int, default=0)
+parser.add_argument('--save_model', type=int, default=1)
 parser.add_argument('--total_line_count', type=int, default=0)
 args = parser.parse_args()
 train_data = args.train_data
 init_model = args.init_model
 batch_size = args.batch_size
 total_epoch = args.total_epoch
-save_epoch = args.save_epoch
+save_model = args.save_model
 total_line_count = args.total_line_count
 
 # sentences 로딩
@@ -70,9 +70,10 @@ def debug(epoch, i, loss, prev, nex, prev_pred, next_pred):
         if last_best_loss is None or last_best_loss > trail_loss:
             print("Loss improved from {} to {}".format(last_best_loss, trail_loss))
 
-            save_loc = "./saved_models/skip-best".format(lr, VOCAB_SIZE)
-            print("saving model at {}".format(save_loc))
-            torch.save(mod.state_dict(), save_loc)
+            if save_model:
+                save_loc = "./saved_models/skip-best".format(lr, VOCAB_SIZE)
+                print("saving model at {}".format(save_loc))
+                torch.save(mod.state_dict(), save_loc)
 
             last_best_loss = trail_loss
     except Exception as e:
@@ -101,7 +102,7 @@ for epoch in range(0, total_epoch):
         optimizer.step()
 
     # save after every epoch
-    if save_epoch:
+    if save_model:
         save_loc_epoch = "./saved_models/skip-{}-epoch".format(epoch)
         print("saving model at {}".format(save_loc_epoch))
         torch.save(mod.state_dict(), save_loc_epoch)
