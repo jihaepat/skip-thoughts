@@ -31,9 +31,8 @@ class DataLoader:
         # np.array
         indices = np.empty(MAXLEN, dtype=np.int)
         indices.fill(EOS)
-        indices[0] = BOS
-        for i, w in enumerate(sentence.split()[:MAXLEN-2]):
-            indices[i+1] = int(w)
+        for i, w in enumerate(sentence.split()[:MAXLEN-1]):
+            indices[i] = int(w)
         # torch.Variable
         indices = Variable(torch.from_numpy(indices))
         if USE_CUDA:
