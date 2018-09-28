@@ -10,12 +10,14 @@ from datetime import datetime
 # 파라메터 세팅
 parser = argparse.ArgumentParser()
 parser.add_argument('--train_data', type=str, default='./data/test.id')
-parser.add_argument('--batch_size', type=int, default=200)
 parser.add_argument('--init_model', type=str, default='./saved_models/skip-best')
+parser.add_argument('--batch_size', type=int, default=200)
+parser.add_argument('--total_epoch', type=int, default=2)
 args = parser.parse_args()
 train_data = args.train_data
-batch_size = args.batch_size
 init_model = args.init_model
+batch_size = args.batch_size
+total_epoch = args.total_epoch
 
 # sentences 로딩
 d = DataLoader(train_data)
@@ -76,21 +78,27 @@ def debug(i, loss, prev, nex, prev_pred, next_pred):
 # train!!!
 lr = 3e-4
 optimizer = torch.optim.Adam(params=mod.parameters(), lr=lr)
-iter_count_per_1epoch = int(math.ceil(sentences_count/batch_size))
-print('iter_count_per_1epoch : {}'.format(iter_count_per_1epoch))
+iter_count_per_epoch = int(math.ceil(sentences_count/batch_size))
+print('iter_count_per_epoch : {}'.format(iter_count_per_epoch))
 
 print("Starting training...")
 
-for i in range(0, iter_count_per_1epoch):
-    sentences, lengths = d.fetch_batch(batch_size)
+for epoch in range(0, total_epoch):
+    for i in range(0, iter_count_per_epoch):
+        sentences, lengths = d.fetch_batch(batch_size)
 
-    loss, prev, nex, prev_pred, next_pred  = mod(sentences, lengths)
+        loss, prev, nex, prev_pred, next_pred = mod(sentences, lengths)
 
-    if i % 10 == 0:
-        debug(i, loss, prev, nex, prev_pred, next_pred)
+        if i % 10 == 0:
+            debug(i, loss, prev, nex, prev_pred, next_pred)
 
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+    # save after every epoch
+    save_loc_epoch = "./saved_models/skip-{}-epoch".format(epoch)
+    print("saving model at {}".format(save_loc_epoch))
+    torch.save(mod.state_dict(), save_loc_epoch)
 
 print('End training.')
