@@ -10,8 +10,8 @@ from datetime import datetime
 # 파라메터 세팅
 parser = argparse.ArgumentParser()
 parser.add_argument('--train_data', type=str, default='./data/test.id')
-parser.add_argument('--init_model', type=str, default='')
-parser.add_argument('--batch_size', type=int, default=200)
+parser.add_argument('--init_model', type=str, default='./saved_models/skip-best')
+parser.add_argument('--batch_size', type=int, default=400)
 parser.add_argument('--total_epoch', type=int, default=2)
 args = parser.parse_args()
 train_data = args.train_data
@@ -40,7 +40,7 @@ last_best_loss = None
 current_time = datetime.utcnow()
 
 
-def debug(i, loss, prev, nex, prev_pred, next_pred):
+def debug(epoch, i, loss, prev, nex, prev_pred, next_pred):
     global loss_trail
     global last_best_loss
     global current_time
@@ -51,8 +51,8 @@ def debug(i, loss, prev, nex, prev_pred, next_pred):
     new_current_time = datetime.utcnow()
     time_elapsed = str(new_current_time - current_time)
     current_time = new_current_time
-    print("Iteration {}: time = {} last_best_loss = {}, this_loss = {}".format(
-              i, time_elapsed, last_best_loss, this_loss))
+    print("Epoch {} - Iteration {}: time = {} last_best_loss = {}, this_loss = {}".format(
+              epoch, i, time_elapsed, last_best_loss, this_loss))
 
     print("prev = {}\nnext = {}\npred_prev = {}\npred_next = {}".format(
         d.convert_indices_to_sentences(prev),
@@ -90,7 +90,7 @@ for epoch in range(0, total_epoch):
         loss, prev, nex, prev_pred, next_pred = mod(sentences, lengths)
 
         if i % 10 == 0:
-            debug(i, loss, prev, nex, prev_pred, next_pred)
+            debug(epoch, i, loss, prev, nex, prev_pred, next_pred)
 
         optimizer.zero_grad()
         loss.backward()
