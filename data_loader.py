@@ -7,27 +7,38 @@ from torch.autograd import Variable
 from config import *
 import numpy as np
 import random
+import os
 
 np.random.seed(0)
 
 
 class DataLoader:
     def __init__(self, text_file, total_line_count=None):
-        sentences = []
-        lengths = []
+        if not total_line_count:
+            print('counting begin...')
+            total_line_count = int(os.popen('wc -l {}'.format(text_file)).read().split()[0])
+            print('total_line_count: {}'.format(total_line_count))
+            print('counting end.')
+        print('array init begin...')
+        sentences = np.empty((total_line_count, MAXLEN), dtype=np.int16)
+        sentences.fill(EOS)
+        lengths = np.empty(total_line_count, dtype=np.int16)
+        lengths.fill(0)
+        print('array init end.')
 
         print("Loading text file at {}".format(text_file))
         with open(text_file, "rt") as f:
-            for line in f:
-                indices = np.empty(MAXLEN, dtype=np.int16)
-                indices.fill(EOS)
+            for i, line in enumerate(f):
+                if i >= total_line_count:
+                    break
                 splits = line.split()
-                for i, w in enumerate(splits[:MAXLEN-1]):
-                    indices[i] = int(w)
-                assert indices[-1] == EOS
-                sentences.append(indices)
+                for j, w in enumerate(splits[:MAXLEN-1]):
+                    sentences[i][j] = int(w)
+                assert sentences[i][-1] == EOS
                 # +1 을 해서 끝의 EOS 를 포함시킨다.
-                lengths.append(min(len(splits) + 1, MAXLEN))
+                lengths[i] = min(len(splits) + 1, MAXLEN)
+                if i % 100000 == 0:
+                    print('{} sentences loaded.'.format(i))
 
         self.sentences = sentences
         self.lengths = lengths
