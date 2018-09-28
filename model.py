@@ -99,11 +99,6 @@ class UniSkip(nn.Module):
         for i, l in enumerate(lengths):
             for j in range(l):
                 mask[i, j] = 1
-
-        mask = Variable(mask)
-        if USE_CUDA:
-            mask = mask.cuda(var.get_device())
-
         return mask
 
     def forward(self, sentences, lengths):
