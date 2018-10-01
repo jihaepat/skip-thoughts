@@ -104,7 +104,7 @@ class UniSkip(nn.Module):
         assert result.is_cuda == USE_CUDA
         return result
 
-    def forward(self, sentences, lengths):
+    def forward(self, sentences):
         # sentences = (B, maxlen)
         # lengths = (B)
 

@@ -93,9 +93,9 @@ sys.stderr.write("training begin...\n")
 
 for epoch in range(0, total_epoch):
     for i in range(0, iter_count_per_epoch):
-        sentences, lengths = d.fetch_batch(batch_size)
+        sentences = d.fetch_batch(batch_size)
 
-        loss, prev, nex, prev_pred, next_pred = mod(sentences, lengths)
+        loss, prev, nex, prev_pred, next_pred = mod(sentences)
 
         if i % 10 == 0:
             debug(epoch, i, loss, prev, nex, prev_pred, next_pred)
