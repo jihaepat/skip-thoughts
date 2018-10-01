@@ -58,14 +58,13 @@ class DataLoader:
 
     def fetch_batch(self, batch_size):
         first_index = random.randint(0, len(self.sentences) - batch_size)
-        batch = []
+        batch = np.empty((batch_size, MAXLEN), dtype=np.int16)
 
         for i in range(first_index, first_index + batch_size):
             sentence = self.sentences[i]
-            sentence = Variable(torch.from_numpy(sentence.astype(dtype=np.int)))
-            if USE_CUDA:
-                sentence = sentence.cuda(CUDA_DEVICE)
-            batch.append(sentence)
+            batch[i - first_index] = sentence
 
-        batch = torch.stack(batch)
+        batch = Variable(torch.from_numpy(batch.astype(dtype=np.int)))
+        if USE_CUDA:
+            batch = batch.cuda(CUDA_DEVICE)
         return batch
