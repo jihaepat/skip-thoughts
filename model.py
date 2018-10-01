@@ -8,17 +8,17 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from config import *
 
+IDX = [i for i in range(MAXLEN - 1, -1, -1)]
+IDX = Variable(torch.LongTensor(IDX))
+if USE_CUDA:
+    IDX = IDX.cuda(CUDA_DEVICE)
+
 
 class Encoder(nn.Module):
     @staticmethod
     def reverse_variable(var):
-        idx = [i for i in range(var.size(0) - 1, -1, -1)]
-        idx = Variable(torch.LongTensor(idx))
-
-        if USE_CUDA:
-            idx = idx.cuda(CUDA_DEVICE)
-
-        inverted_var = var.index_select(0, idx)
+        global IDX
+        inverted_var = var.index_select(0, IDX)
         return inverted_var
 
     def __init__(self):
