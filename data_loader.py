@@ -8,6 +8,7 @@ from config import *
 import numpy as np
 import random
 import os
+import sys
 
 np.random.seed(0)
 
@@ -15,25 +16,25 @@ np.random.seed(0)
 class DataLoader:
     def __init__(self, text_file, total_line_count=None):
         try:
-            print('array load begin...')
+            sys.stderr.write('array load begin...\n')
             sentences = np.load('{}.sentences.npy'.format(text_file))
             lengths = np.load('{}.lengths.npy'.format(text_file))
             total_line_count = len(sentences)
-            print('array load end.')
+            sys.stderr.write('array load end.\n')
         except:
             if not total_line_count:
-                print('counting begin...')
+                sys.stderr.write('counting begin...\n')
                 total_line_count = int(os.popen('wc -l {}'.format(text_file)).read().split()[0])
-                print('total_line_count: {}'.format(total_line_count))
-                print('counting end.')
-            print('array init begin...')
+                sys.stderr.write('total_line_count: {}\n'.format(total_line_count))
+                sys.stderr.write('counting end.\n')
+            sys.stderr.write('array init begin...\n')
             sentences = np.empty((total_line_count, MAXLEN), dtype=np.int16)
             sentences.fill(EOS)
             lengths = np.empty(total_line_count, dtype=np.int16)
             lengths.fill(0)
-            print('array init end.')
+            sys.stderr.write('array init end.\n')
 
-            print("Loading text file at {}".format(text_file))
+            sys.stderr.write("Loading text file at {}\n".format(text_file))
             with open(text_file, "rt") as f:
                 for i, line in enumerate(f):
                     if i >= total_line_count:
@@ -44,7 +45,7 @@ class DataLoader:
                     # +1 을 해서 끝의 EOS 를 포함시킨다.
                     lengths[i] = min(len(splits) + 1, MAXLEN)
                     if i % 100000 == 0:
-                        print('{} sentences loaded.'.format(i))
+                        sys.stderr.write('{} sentences loaded.\n'.format(i))
 
             np.save('{}.sentences.npy'.format(text_file), sentences)
             np.save('{}.lengths.npy'.format(text_file), lengths)

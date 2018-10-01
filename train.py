@@ -1,6 +1,7 @@
 import argparse
 import math
 import torch
+import sys
 
 from data_loader import DataLoader
 from model import UniSkip
@@ -26,19 +27,19 @@ total_line_count = args.total_line_count
 # sentences 로딩
 d = DataLoader(train_data, total_line_count)
 sentences_count = len(d.sentences)
-print('total {} sentences'.format(sentences_count))
+sys.stderr.write('total {} sentences\n'.format(sentences_count))
 
 # 모델 초기화
-print('model init begin...')
+sys.stderr.write('model init begin...\n')
 mod = UniSkip()
 if init_model:
     try:
         mod.load_state_dict(torch.load(init_model, map_location=lambda storage, loc: storage))
     except:
-        print('load init_model failed: {}'.format(init_model))
+        sys.stderr.write('load init_model failed: {}\n'.format(init_model))
 if USE_CUDA:
     mod.cuda(CUDA_DEVICE)
-print('model init end.')
+sys.stderr.write('model init end.\n')
 
 # 디버깅용 변수 및 함수
 loss_trail = []
@@ -57,38 +58,38 @@ def debug(epoch, i, loss, prev, nex, prev_pred, next_pred):
     new_current_time = datetime.utcnow()
     time_elapsed = str(new_current_time - current_time)
     current_time = new_current_time
-    print("Epoch {} - Iteration {}: time = {} last_best_loss = {}, this_loss = {}".format(
+    sys.stderr.write("Epoch {} - Iteration {}: time = {} last_best_loss = {}, this_loss = {}\n".format(
               epoch, i, time_elapsed, last_best_loss, this_loss))
 
-    print("prev = {}\nnext = {}\npred_prev = {}\npred_next = {}".format(
+    print("prev = {}\npred_prev = {}\n\nnext = {}\npred_next = {}\n".format(
         d.convert_var_to_sentences(prev),
-        d.convert_var_to_sentences(nex),
         d.convert_var_to_sentences(prev_pred),
+        d.convert_var_to_sentences(nex),
         d.convert_var_to_sentences(next_pred),
     ))
 
     try:
         trail_loss = sum(loss_trail)/len(loss_trail)
         if last_best_loss is None or last_best_loss > trail_loss:
-            print("Loss improved from {} to {}".format(last_best_loss, trail_loss))
+            sys.stderr.write("Loss improved from {} to {}\n".format(last_best_loss, trail_loss))
 
             if save_model:
                 save_loc = "./saved_models/skip-best".format(lr, VOCAB_SIZE)
-                print("saving model at {}".format(save_loc))
+                sys.stderr.write("saving model at {}\n".format(save_loc))
                 torch.save(mod.state_dict(), save_loc)
 
             last_best_loss = trail_loss
     except Exception as e:
-       print("Couldn't save model because {}".format(e))
+        sys.stderr.write("Couldn't save model because {}\n".format(e))
 
 
 # train!!!
 lr = 3.16e-4
 optimizer = torch.optim.Adam(params=mod.parameters(), lr=lr)
 iter_count_per_epoch = int(math.ceil(sentences_count/batch_size))
-print('iter_count_per_epoch : {}'.format(iter_count_per_epoch))
+sys.stderr.write('iter_count_per_epoch : {}\n'.format(iter_count_per_epoch))
 
-print("training begin...")
+sys.stderr.write("training begin...\n")
 
 for epoch in range(0, total_epoch):
     for i in range(0, iter_count_per_epoch):
@@ -106,7 +107,7 @@ for epoch in range(0, total_epoch):
     # save after every epoch
     if save_model:
         save_loc_epoch = "./saved_models/skip-{}-epoch".format(epoch)
-        print("saving model at {}".format(save_loc_epoch))
+        sys.stderr.write("saving model at {}\n".format(save_loc_epoch))
         torch.save(mod.state_dict(), save_loc_epoch)
 
-print('training end.')
+sys.stderr.write('training end.\n')
