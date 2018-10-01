@@ -61,7 +61,7 @@ def debug(epoch, i, loss, prev, nex, prev_pred, next_pred):
     sys.stderr.write("Epoch {} - Iteration {}: time = {} last_best_loss = {}, this_loss = {}\n".format(
               epoch, i, time_elapsed, last_best_loss, this_loss))
 
-    print("prev = {}\npred_prev = {}\n\nnext = {}\npred_next = {}\n".format(
+    print("{}\n{}\n\n{}\n{}\n".format(
         d.convert_var_to_sentences(prev),
         d.convert_var_to_sentences(prev_pred),
         d.convert_var_to_sentences(nex),
