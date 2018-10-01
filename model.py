@@ -94,12 +94,15 @@ class UniSkip(nn.Module):
         self.encoder = Encoder()
         self.decoders = DuoDecoder()
 
-    def create_mask(self, var, lengths):
-        mask = var.data.new().resize_as_(var.data).fill_(0)
-        for i, l in enumerate(lengths):
-            for j in range(l):
-                mask[i, j] = 1
-        return mask
+    def create_mask(self, var, sentences):
+        B = var.shape[0]                ;assert var.shape == (B, MAXLEN, VOCAB_SIZE)
+        mask1 = (sentences != EOS)      ;assert mask1.shape == (B, MAXLEN)
+        mask2 = mask1.float()           ;assert mask2.is_cuda == USE_CUDA
+        transposed = var.transpose(0, 2).transpose(1, 2)    ;assert transposed.shape == (VOCAB_SIZE, B, MAXLEN)
+        expanded = mask2.expand_as(transposed)              ;assert expanded.shape == (VOCAB_SIZE, B, MAXLEN)
+        result = expanded.transpose(1, 2).transpose(0, 2)   ;assert result.shape == (B, MAXLEN, VOCAB_SIZE)
+        assert result.is_cuda == USE_CUDA
+        return result
 
     def forward(self, sentences, lengths):
         # sentences = (B, maxlen)
@@ -112,8 +115,8 @@ class UniSkip(nn.Module):
         prev_pred, next_pred = self.decoders(thoughts, word_embeddings)  # both = (batch-1, maxlen, VOCAB_SIZE)
 
         # mask the predictions, so that loss for beyond-EOS word predictions is cancelled.
-        prev_mask = self.create_mask(prev_pred, lengths[:-1])
-        next_mask = self.create_mask(next_pred, lengths[1:])
+        prev_mask = self.create_mask(prev_pred, sentences[:-1])
+        next_mask = self.create_mask(next_pred, sentences[1:])
         
         masked_prev_pred = prev_pred * prev_mask
         masked_next_pred = next_pred * next_mask
