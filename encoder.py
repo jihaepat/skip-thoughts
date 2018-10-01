@@ -13,7 +13,7 @@ from cityhash import CityHash128
 # 파라메터 세팅
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', type=str, default='./saved_models/skip-best')
-parser.add_argument('--batch_size', type=int, default=64)
+parser.add_argument('--batch_size', type=int, default=7000)
 parser.add_argument('--input_file', type=str, default='')
 parser.add_argument('--output_path', type=str, default='./encodings')
 args = parser.parse_args()
