@@ -17,8 +17,8 @@ if USE_CUDA:
 class Encoder(nn.Module):
     @staticmethod
     def reverse_variable(var):
-        global IDX
-        inverted_var = var.index_select(0, IDX)
+        global IDX                                  ;assert IDX.is_cuda == USE_CUDA
+        inverted_var = var.index_select(0, IDX)     ;assert inverted_var.is_cuda == USE_CUDA
         return inverted_var
 
     def __init__(self):
