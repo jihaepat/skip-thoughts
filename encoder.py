@@ -38,8 +38,6 @@ lines = []
 encoder = mod.encoder
 sentences = np.empty((batch_size, MAXLEN), dtype=np.int)
 sentences.fill(EOS)
-lengths = np.empty(batch_size, dtype=np.int)
-lengths.fill(0)
 
 # time variables
 current_time = datetime.utcnow()
@@ -49,14 +47,12 @@ current_time = new_current_time
 
 
 def process_batch():
-    global lines, encoder, sentences, lengths
+    global lines, encoder, sentences
     # numpy array 초기화
     for i, line in enumerate(lines):
         splits = line.split()
         for j, w in enumerate(splits[:MAXLEN - 1]):
             sentences[i][j] = int(w)
-        # +1 을 해서 끝의 EOS 를 포함시킨다.
-        lengths[i] = min(len(splits) + 1, MAXLEN)
     # numpy --> torch
     batch = Variable(torch.from_numpy(sentences))
     if USE_CUDA:
@@ -74,7 +70,6 @@ def process_batch():
         np.save('{}/{}.npy'.format(path, h), encoding)
     # finalize
     sentences.fill(EOS)
-    lengths.fill(0)
     lines = []
 
 

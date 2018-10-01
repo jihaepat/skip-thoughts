@@ -106,7 +106,6 @@ class UniSkip(nn.Module):
 
     def forward(self, sentences):
         # sentences = (B, maxlen)
-        # lengths = (B)
 
         # Compute Thought Vectors for each sentence. Also get the actual word embeddings for teacher forcing.
         thoughts, word_embeddings = self.encoder(sentences)  # thoughts = (B, THOUGHT_SIZE), word_embeddings = (B, maxlen, WORD_SIZE)
