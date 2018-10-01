@@ -15,10 +15,12 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--model', type=str, default='./saved_models/skip-best')
 parser.add_argument('--batch_size', type=int, default=64)
 parser.add_argument('--input_file', type=str, default='')
+parser.add_argument('--output_path', type=str, default='./encodings')
 args = parser.parse_args()
 model = args.model
 batch_size = args.batch_size
 input_file = args.input_file
+output_path = args.output_path
 f = None
 if input_file:
     f = open(input_file)
@@ -69,7 +71,7 @@ def process_batch():
         assert normalized.shape == (THOUGHT_SIZE,)
         h = CityHash128(line)
         ht = '000000{}'.format(h)
-        path = './encodings/{}/{}'.format(ht[-3:], ht[-6:-3])
+        path = '{}/{}/{}'.format(output_path, ht[-3:], ht[-6:-3])
         pathlib.Path(path).mkdir(parents=True, exist_ok=True)
         np.save('{}/{}_{}.npy'.format(path, h, norm), normalized)
     # finalize
