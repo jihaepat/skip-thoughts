@@ -77,10 +77,10 @@ def process_batch():
         # assert 0.99 <= np.sqrt(np.dot(normalized, normalized)) <= 1.01
         assert normalized.shape == (THOUGHT_SIZE,)
         h = CityHash128(line)
-        # if h in results:
-        #     assert line == results[h]['line']
-        #     duplicate_count += 1
-        results[h] = {'norm': norm, 'normalized': normalized}
+        if h in results:
+            assert line == results[h]['line']
+            duplicate_count += 1
+        results[h] = {'norm': norm, 'normalized': normalized, 'line': line}
     # finalize
     sentences.fill(EOS)
     lines.clear()
