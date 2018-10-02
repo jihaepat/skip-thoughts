@@ -83,6 +83,8 @@ def process_batch():
         results[h] = {'norm': norm, 'normalized': normalized}
     # finalize
     sentences.fill(EOS)
+    lines.clear()
+    lines = None
     lines = []
     processed_batch_count += 1
 
@@ -91,6 +93,8 @@ def dump_output():
     global results
     with open('{}/{}_{}.pkl'.format(output_path, input_file.split('/')[-1], processed_batch_count), 'wb') as f:
         pickle.dump(results, f)
+    results.clear()
+    results = None
     results = {}
     print(processed_line_count)
     print(duplicate_count)
