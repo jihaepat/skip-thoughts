@@ -2,7 +2,7 @@ import argparse
 import sys
 import torch
 import numpy as np
-import pathlib
+import pickle
 
 from torch.autograd import Variable
 from model import UniSkip
@@ -13,14 +13,16 @@ from cityhash import CityHash128
 # 파라메터 세팅
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', type=str, default='./saved_models/skip-best')
-parser.add_argument('--batch_size', type=int, default=7000)
-parser.add_argument('--input_file', type=str, default='')
+parser.add_argument('--batch_size', type=int, default=1000)
+parser.add_argument('--input_file', type=str, default='./data/test.id')
 parser.add_argument('--output_path', type=str, default='./encodings')
+parser.add_argument('--batch_count_per_output_file', type=int, default=1000)
 args = parser.parse_args()
 model = args.model
 batch_size = args.batch_size
 input_file = args.input_file
 output_path = args.output_path
+batch_count_per_output_file = args.batch_count_per_output_file
 f = None
 if input_file:
     f = open(input_file)
@@ -40,6 +42,10 @@ lines = []
 encoder = mod.encoder
 sentences = np.empty((batch_size, MAXLEN), dtype=np.int)
 sentences.fill(EOS)
+results = {}
+processed_batch_count = 0
+processed_line_count = 0
+duplicate_count = 0
 
 # time variables
 current_time = datetime.utcnow()
@@ -49,12 +55,13 @@ current_time = new_current_time
 
 
 def process_batch():
-    global lines, encoder, sentences
+    global lines, sentences, results, processed_batch_count, processed_line_count, duplicate_count
     # numpy array 초기화
     for i, line in enumerate(lines):
         splits = line.split()
         for j, w in enumerate(splits[:MAXLEN - 1]):
             sentences[i][j] = int(w)
+        processed_line_count += 1
     # numpy --> torch
     batch = Variable(torch.from_numpy(sentences))   ;assert batch.shape == (batch_size, MAXLEN)
     if USE_CUDA:
@@ -70,26 +77,38 @@ def process_batch():
         # assert 0.99 <= np.sqrt(np.dot(normalized, normalized)) <= 1.01
         assert normalized.shape == (THOUGHT_SIZE,)
         h = CityHash128(line)
-        ht = '000000{}'.format(h)
-        path = '{}/{}/{}'.format(output_path, ht[-3:], ht[-6:-3])
-        pathlib.Path(path).mkdir(parents=True, exist_ok=True)
-        np.save('{}/{}_{}.npy'.format(path, h, norm), normalized)
+        # if h in results:
+        #     assert line == results[h]['line']
+        #     duplicate_count += 1
+        results[h] = {'norm': norm, 'normalized': normalized}
     # finalize
     sentences.fill(EOS)
     lines = []
+    processed_batch_count += 1
+
+
+def dump_output():
+    global results
+    with open('{}/{}_{}.pkl'.format(output_path, input_file.split('/')[-1], processed_batch_count), 'wb') as f:
+        pickle.dump(results, f)
+    results = {}
+    print(processed_line_count)
+    print(duplicate_count)
 
 
 print("encoding begin...")
 
 for input_line in f:
-    # batch_size 만큼 쌓기
+    lines.append(input_line)
     if len(lines) < batch_size:
-        lines.append(input_line)
         continue
     process_batch()
+    if processed_batch_count % batch_count_per_output_file == 0:
+        dump_output()
 else:
     if lines:
         process_batch()
+        dump_output()
 if f != sys.stdin:
     f.close()
 
