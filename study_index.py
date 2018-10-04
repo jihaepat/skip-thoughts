@@ -31,7 +31,9 @@ for j, i in enumerate(iq):
 
 # index
 quantizer = faiss.IndexFlatL2(d)
-index = faiss.IndexIVFFlat(quantizer, d, 200, faiss.METRIC_L2)
+nlist = 200
+m = 300
+index = faiss.IndexIVFPQ(quantizer, d, nlist, m, 8)
 assert not index.is_trained
 index.train(xb)
 assert index.is_trained
@@ -55,5 +57,5 @@ with open('result_study.txt', 'w') as f:
         f.write('\n')
         print()
 
-# search time : 0.20s, mem 15.1%
+# search time : 0.13s, mem 15.1%
 print('time: {}'.format(end - start))
