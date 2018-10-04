@@ -51,5 +51,5 @@ with open('result_study.txt', 'w') as f:
         f.write('\n')
         print()
 
-# search time : 0.65s
+# search : 0.60s, mem 13.2%
 print('time: {}'.format(end - start))
