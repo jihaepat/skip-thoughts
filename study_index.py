@@ -31,12 +31,12 @@ for j, i in enumerate(iq):
 
 # index
 quantizer = faiss.IndexFlatL2(d)
-index = faiss.IndexIVFFlat(quantizer, d, 2000, faiss.METRIC_L2)
+index = faiss.IndexIVFFlat(quantizer, d, 200, faiss.METRIC_L2)
 assert not index.is_trained
 index.train(xb)
 assert index.is_trained
 index.add(xb)
-index.nprobe = 10
+index.nprobe = 2
 
 # search
 K = 10
@@ -55,5 +55,5 @@ with open('result_study.txt', 'w') as f:
         f.write('\n')
         print()
 
-# search time : 0.13s, mem 15.1%
+# search time : 0.20s, mem 15.1%
 print('time: {}'.format(end - start))
