@@ -9,7 +9,7 @@ from glob2 import glob
 # 준비
 files = glob('/mnt/48TB/temp3/encodings/*')
 results = []
-for file, _ in zip(files, range(2)):
+for file in files[:1]:
     with open(file, 'rb') as f:
         results.extend(pickle.load(f).values())
 d = 1200
@@ -30,15 +30,14 @@ for j, i in enumerate(iq):
     xq[j] = xb[i]
 
 # index
-quantizer = faiss.IndexFlatL2(d)
-nlist = 200
-m = 300
-index = faiss.IndexIVFPQ(quantizer, d, nlist, m, 8)
+print('create index...')
+index = faiss.index_factory(d, 'OPQ60,IMI2x14,PQ60')
 assert not index.is_trained
+print('train index...')
 index.train(xb)
 assert index.is_trained
+print('add data to index...')
 index.add(xb)
-index.nprobe = 2
 
 # search
 K = 10
