@@ -14,6 +14,7 @@ for file, _ in zip(files, range(2)):
         results.extend(pickle.load(f).values())
 d = 1200
 nb = len(results)
+print(nb)
 nq = 100
 
 # xb 초기화 : 전체 data
@@ -29,10 +30,13 @@ for j, i in enumerate(iq):
     xq[j] = xb[i]
 
 # index
-index = faiss.IndexFlatL2(d)
-print(index.is_trained)
+quantizer = faiss.IndexFlatL2(d)
+index = faiss.IndexIVFFlat(quantizer, d, 2000, faiss.METRIC_L2)
+assert not index.is_trained
+index.train(xb)
+assert index.is_trained
 index.add(xb)
-print(index.ntotal)
+index.nprobe = 10
 
 # search
 K = 10
@@ -51,5 +55,5 @@ with open('result_study.txt', 'w') as f:
         f.write('\n')
         print()
 
-# search : 0.60s, mem 13.2%
+# search time : 0.13s, mem 15.1%
 print('time: {}'.format(end - start))
