@@ -10,10 +10,9 @@ from time import sleep
 
 
 class VectorIndex(object):
-    def __init__(self, dim, dir, train_file_count, index_type):
+    def __init__(self, dim, dir, index_type):
         self.dim = dim
         self.dir = dir
-        self.train_file_count = train_file_count
         self.index_type = index_type
         self.index = None
         self.data = []
@@ -24,10 +23,9 @@ class VectorIndex(object):
 
     def train_index(self):
         print('train index...')
-        files = glob(os.path.join(self.dir, '*'))
-        random.shuffle(files)
+        files = glob(os.path.join(self.dir, '*._train*.pkl'))
         train_data = []
-        for file in files[:self.train_file_count]:
+        for file in files:
             with open(file, 'rb') as f:
                 train_data.extend(pickle.load(f).values())
         nt = len(train_data)
@@ -100,7 +98,7 @@ class VectorIndex(object):
 
 if __name__ == '__main__':
     # init
-    index = VectorIndex(dim=1200, dir='/mnt/48TB/temp3/encodings', train_file_count=6, index_type='OPQ60,IMI2x14,PQ60')
+    index = VectorIndex(dim=1200, dir='/mnt/48TB/temp3/encodings', index_type='OPQ60,IMI2x10,PQ60')
     index.init_index()
     index.nprobe = 10
 
