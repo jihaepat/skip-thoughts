@@ -4,6 +4,7 @@ import pickle
 import timeit
 import random
 import os
+import argparse
 
 from glob2 import glob
 from time import sleep
@@ -62,9 +63,10 @@ class VectorIndex(object):
         print('init index completed')
 
     def add_to_index(self):
-        files = glob(os.path.join(self.dir, '*'))
+        # files = glob(os.path.join(self.dir, '*.??_*.pkl'))
+        files = glob(os.path.join(self.dir, '*._train*.pkl'))
         data = []
-        for j, file in enumerate(files[:2]):
+        for j, file in enumerate(files[:6]):
             with open(file, 'rb') as f:
                 print('add data to index...: {}'.format(j))
                 values = list(pickle.load(f).values())
@@ -79,8 +81,9 @@ class VectorIndex(object):
                 pickle.dump(data, f2)
         self.data = data
 
-    def sample(self, n=10):
-        files = glob(os.path.join(self.dir, '*'))
+    def sample(self, n):
+        # files = glob(os.path.join(self.dir, '*.??_*.pkl'))
+        files = glob(os.path.join(self.dir, '*._train*.pkl'))
         random.shuffle(files)
         with open(files[0], 'rb') as f:
             values = list(pickle.load(f).values())
@@ -97,13 +100,19 @@ class VectorIndex(object):
 
 
 if __name__ == '__main__':
+    # path
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--path', type=str, default='/home/gulby/git/jtelips/temp')
+    args = parser.parse_args()
+    path = args.path
+
     # init
-    index = VectorIndex(dim=1200, dir='/mnt/48TB/temp3/encodings', index_type='OPQ60,IMI2x10,PQ60')
+    index = VectorIndex(dim=1200, dir=path, index_type='Flat')
     index.init_index()
     index.nprobe = 10
 
     # search
-    xq, data = index.sample(n=10)
+    xq, data = index.sample(n=100)
     K = 10
     start = timeit.default_timer()
     D, I = index.search(xq, K)
