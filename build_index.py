@@ -66,16 +66,17 @@ class VectorIndex(object):
         files = glob(os.path.join(self.dir, '*.??_*.pkl'))
         # files = glob(os.path.join(self.dir, '*._train*.pkl'))
         for j, file in enumerate(files):
-            data = []
+            print('add data to index...: {}'.format(j))
             with open(file, 'rb') as f:
-                print('add data to index...: {}'.format(j))
                 values = list(pickle.load(f).values())
-                data.extend([value['line'] for value in values])
-                vectors = np.empty((len(values), self.dim), np.float32)
-                for i in range(len(values)):
-                    vectors[i] = values[i]['normalized']
-                self.index.add(vectors)
-            values, vectors = None, None; del values; del vectors
+            data = [value['line'] for value in values]
+            vectors = np.empty((len(values), self.dim), np.float32)
+            for i in range(len(values)):
+                vectors[i] = values[i]['normalized']
+            values = None; del values
+            sleep(1.0)
+            self.index.add(vectors)
+            vectors = None; del vectors
             sleep(1.0)
             faiss.write_index(self.index, self.index_file)
             total_data = []
