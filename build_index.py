@@ -2,7 +2,6 @@ import faiss
 import numpy as np
 import pickle
 import timeit
-import random
 import os
 import argparse
 
@@ -56,17 +55,18 @@ class VectorIndex(object):
             try:
                 self.index = faiss.read_index('{}.train'.format(self.index_file))
                 assert self.index.is_trained
-                self.add_to_index()
             except:
                 self.train_index()
-                self.add_to_index()
+            self.add_to_index()
+            with open('{}.data'.format(self.index_file), 'rb') as f:
+                self.data = pickle.load(f)
         print('init index completed')
 
     def add_to_index(self):
-        # files = glob(os.path.join(self.dir, '*.??_*.pkl'))
-        files = glob(os.path.join(self.dir, '*._train*.pkl'))
-        data = []
-        for j, file in enumerate(files[:6]):
+        files = glob(os.path.join(self.dir, '*.??_*.pkl'))
+        # files = glob(os.path.join(self.dir, '*._train*.pkl'))
+        for j, file in enumerate(files):
+            data = []
             with open(file, 'rb') as f:
                 print('add data to index...: {}'.format(j))
                 values = list(pickle.load(f).values())
@@ -76,27 +76,43 @@ class VectorIndex(object):
                     vectors[i] = values[i]['normalized']
                 self.index.add(vectors)
             values, vectors = None, None; del values; del vectors
+            sleep(1.0)
             faiss.write_index(self.index, self.index_file)
-            with open('{}.data'.format(self.index_file), 'wb') as f2:
-                pickle.dump(data, f2)
-        self.data = data
+            total_data = []
+            try:
+                with open('{}.data'.format(self.index_file), 'rb') as f2:
+                    total_data = pickle.load(f2)
+            except:
+                pass
+            total_data.extend(data)
+            with open('{}.data'.format(self.index_file), 'wb') as f3:
+                pickle.dump(total_data, f3)
+            data, total_data = None, None; del data; del total_data
+            sleep(1.0)
 
     def sample(self, n):
         # files = glob(os.path.join(self.dir, '*.??_*.pkl'))
         files = glob(os.path.join(self.dir, '*._train*.pkl'))
-        random.shuffle(files)
+        # import random
+        # random.shuffle(files)
         with open(files[0], 'rb') as f:
             values = list(pickle.load(f).values())
         vectors = np.empty((n, self.dim), dtype=np.float32)
         data = []
-        for i, j in enumerate(np.random.randint(low=0, high=len(values), size=n)):
-            vectors[i] = values[j]['normalized']
-            data.append(values[j]['line'])
+        # for i, j in enumerate(np.random.randint(low=0, high=len(values), size=n)):
+        #     vectors[i] = values[j]['normalized']
+        #     data.append(values[j]['line'])
+        for i in range(n):
+            vectors[i] = values[i]['normalized']
+            data.append(values[i]['line'])
         values = None; del values
         return vectors, data
 
     def search(self, xq, k):
         return self.index.search(xq, k)
+
+    def set_nprobe(self, nprobe):
+        self.index.nprobe = nprobe
 
 
 if __name__ == '__main__':
@@ -107,9 +123,9 @@ if __name__ == '__main__':
     path = args.path
 
     # init
-    index = VectorIndex(dim=1200, dir=path, index_type='Flat')
+    index = VectorIndex(dim=1200, dir=path, index_type='IMI2x14,PQ100')
     index.init_index()
-    index.nprobe = 10
+    index.set_nprobe(1024)
 
     # search
     xq, data = index.sample(n=100)
@@ -128,6 +144,4 @@ if __name__ == '__main__':
                 f.write('{}\n'.format(index.data[r[k]].strip()))
             f.write('\n')
             print()
-
-    # search time : 0.13s, mem 15.1%
     print('time: {}'.format(end - start))
